@@ -18,7 +18,6 @@ exports.createMovement = (data) => {
   return { id: result.lastInsertRowid };
 };
 
-const db = require("../../config/db");
 
 exports.getMovements = () => {
   return db.prepare("SELECT * FROM movements ORDER BY created_at DESC").all();
