@@ -1,8 +1,7 @@
 import axios from "axios";
 
-const API = axios.create({
-  baseURL: "http://localhost:5000/api",
-});
+const API = "https://military-asset-system-1-tgsw.onrender.com/api";
 
-export const fetchDashboard = (params) =>
-  API.get("/dashboard", { params });
+export const fetchDashboard = () => {
+  return axios.get(`${API}/dashboard`);
+};

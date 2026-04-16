@@ -10,25 +10,50 @@ export default function PurchasesPage() {
   });
 
   const [purchases, setPurchases] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const { user } = useAuthStore();
 
-  const API = "http://localhost:5000/api";
+  // ✅ LIVE BACKEND
+  const API = "https://military-asset-system-1-tgsw.onrender.com/api";
 
+  // ✅ FETCH DATA
   const fetchPurchases = async () => {
-    const res = await axios.get(`${API}/movements`);
-    const filtered = res.data.filter((m) => m.type === "PURCHASE");
-    setPurchases(filtered);
+    try {
+      setLoading(true);
+
+      const res = await axios.get(`${API}/movements`);
+
+      // ensure safe array
+      const data = Array.isArray(res.data) ? res.data : [];
+
+      const filtered = data.filter((m) => m.type === "PURCHASE");
+
+      setPurchases(filtered);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setPurchases([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchPurchases();
   }, []);
 
+  // ✅ HANDLE INPUT
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // ✅ SUBMIT
   const handleSubmit = async () => {
+    if (!form.equipment_id || !form.quantity || !form.to_base_id) {
+      alert("⚠️ Please fill all fields");
+      return;
+    }
+
     try {
       await axios.post(`${API}/movements`, {
         ...form,
@@ -36,9 +61,11 @@ export default function PurchasesPage() {
       });
 
       setForm({ equipment_id: "", quantity: "", to_base_id: "" });
+
       fetchPurchases();
     } catch (err) {
-      alert("❌ Failed");
+      console.error(err);
+      alert("❌ Failed to add purchase");
     }
   };
 
@@ -46,6 +73,7 @@ export default function PurchasesPage() {
     <div className="container">
       <h2>Purchases</h2>
 
+      {/* ✅ FORM */}
       <div className="card">
         <input
           name="equipment_id"
@@ -66,34 +94,41 @@ export default function PurchasesPage() {
           onChange={handleChange}
         />
 
-        {user.role !== "COMMANDER" && (
+        {user && user.role !== "COMMANDER" && (
           <button onClick={handleSubmit}>Add Purchase</button>
         )}
       </div>
 
+      {/* ✅ TABLE */}
       <div className="card">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Equipment</th>
-              <th>Quantity</th>
-              <th>Base</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {purchases.map((p) => (
-              <tr key={p.id}>
-                <td>{p.id}</td>
-                <td>{p.equipment_id}</td>
-                <td>{p.quantity}</td>
-                <td>{p.to_base_id}</td>
-                <td>{p.created_at}</td>
+        {loading ? (
+          <p>Loading...</p>
+        ) : purchases.length === 0 ? (
+          <p>No purchases found</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Equipment</th>
+                <th>Quantity</th>
+                <th>Base</th>
+                <th>Date</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {purchases.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.id}</td>
+                  <td>{p.equipment_id}</td>
+                  <td>{p.quantity}</td>
+                  <td>{p.to_base_id}</td>
+                  <td>{p.created_at}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
