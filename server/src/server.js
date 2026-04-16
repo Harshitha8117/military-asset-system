@@ -1,18 +1,13 @@
-// src/server.js
-
 const app = require("./app");
+const initDB = require("./config/initDb");
 
-// Catch unexpected crashes (VERY IMPORTANT for debugging on Render)
-process.on("uncaughtException", (err) => {
-  console.error("❌ UNCAUGHT EXCEPTION:", err);
-});
+// 🌱 Initialize DB (tables + seed data)
+initDB();
 
-process.on("unhandledRejection", (err) => {
-  console.error("❌ UNHANDLED REJECTION:", err);
-});
-
+// 🌍 Use Render PORT or fallback
 const PORT = process.env.PORT || 5000;
 
+// 🚀 Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

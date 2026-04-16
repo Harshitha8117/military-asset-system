@@ -2,6 +2,9 @@
 
 const express = require("express");
 const cors = require("cors");
+const movementRoutes = require("./modules/movements/movement.routes");
+const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
+
 
 const app = express();
 
