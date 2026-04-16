@@ -1,15 +1,18 @@
 // src/server.js
 
-const initDb = require("./config/initDb");
 const app = require("./app");
-const { PORT } = require("./config/env");
 
-const start = async () => {
-  await initDb();
+// Catch unexpected crashes (VERY IMPORTANT for debugging on Render)
+process.on("uncaughtException", (err) => {
+  console.error("❌ UNCAUGHT EXCEPTION:", err);
+});
 
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-  });
-};
+process.on("unhandledRejection", (err) => {
+  console.error("❌ UNHANDLED REJECTION:", err);
+});
 
-start();
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});

@@ -1,20 +1,32 @@
-const Database = require("better-sqlite3");
+// src/config/db.js
 
-const db = new Database("database.sqlite");
+const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
 
-// Create tables
-db.exec(`
-CREATE TABLE IF NOT EXISTS movements (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  type TEXT,
-  equipment_id INTEGER,
-  quantity INTEGER,
-  from_base_id INTEGER,
-  to_base_id INTEGER,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-`);
+// Use safe path (works locally + on Render)
+const dbPath = path.join(__dirname, "../../database.sqlite");
 
-console.log("✅ SQLite (better) connected");
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error("❌ DB Connection Error:", err);
+  } else {
+    console.log("✅ SQLite DB Initialized");
+  }
+});
+
+// 🔥 Create table if not exists
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS movements (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT,
+      equipment_id INTEGER,
+      quantity INTEGER,
+      from_base_id INTEGER,
+      to_base_id INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+});
 
 module.exports = db;
