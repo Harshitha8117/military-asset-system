@@ -1,14 +1,20 @@
-// src/config/db.js
-const sqlite3 = require("sqlite3").verbose();
+const Database = require("better-sqlite3");
 
-const db = new sqlite3.Database("./database.sqlite");
+const db = new Database("database.sqlite");
 
-module.exports = {
-  query: (sql, params = []) =>
-    new Promise((resolve, reject) => {
-      db.all(sql, params, (err, rows) => {
-        if (err) reject(err);
-        else resolve({ rows });
-      });
-    }),
-};
+// Create tables
+db.exec(`
+CREATE TABLE IF NOT EXISTS movements (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT,
+  equipment_id INTEGER,
+  quantity INTEGER,
+  from_base_id INTEGER,
+  to_base_id INTEGER,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+`);
+
+console.log("✅ SQLite (better) connected");
+
+module.exports = db;
